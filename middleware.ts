@@ -2,7 +2,7 @@ import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
 // Rutas que no requieren login ni suscripción activa
-const PUBLIC_ROUTES = ['/login', '/registro', '/api/hotmart-webhook', '/suscripcion-vencida'];
+const PUBLIC_ROUTES = ['/login', '/registro', '/api/hotmart-webhook', '/suscripcion-vencida', '/auth/callback'];
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
