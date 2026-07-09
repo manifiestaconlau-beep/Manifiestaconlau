@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createsupabaseServer } from '@/lib/supabaseClient';
+import { createServiceClient } from '@/lib/supabaseServer';
 
 /**
  * Webhook de Hotmart.
