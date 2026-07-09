@@ -1,0 +1,33 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@400;500;600;700&family=Cormorant+Garamond:ital@0;1&display=swap');
+
+body {
+  background-color: #0D0D14;
+  color: #F5F0EC;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.glow-bg {
+  background: radial-gradient(circle at 50% 15%, rgba(224, 48, 106, 0.35), transparent 55%),
+    #0D0D14;
+  min-height: 100vh;
+}
+
+.font-heading {
+  font-family: 'Bebas Neue', sans-serif;
+  letter-spacing: 0.05em;
+}
+
+.font-accent {
+  font-family: 'Cormorant Garamond', serif;
+}
+
+.card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(224, 48, 106, 0.25);
+  border-radius: 1.25rem;
+  backdrop-filter: blur(8px);
+}
