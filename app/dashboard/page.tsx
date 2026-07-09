@@ -1,4 +1,4 @@
-import { createsupabaseServer } from '@/lib/supabaseClient';
+import { createServerSupabaseClient } from '@/lib/supabaseServer';
 import AffirmationCard from '@/components/AffirmationCard';
 import StreakCard from '@/components/StreakCard';
 import VibeCheckCard from '@/components/VibeCheckCard';
