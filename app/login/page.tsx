@@ -34,7 +34,7 @@ export default function LoginPage() {
   return (
     <main className="flex min-h-screen items-center justify-center px-6">
       <div className="card w-full max-w-md p-8 text-center">
-        <h1 className="font-heading text-4xl text-pink mb-2">Manifiesta con Lau</h1>
+       <h1 className="font-heading text-4xl text-pink mb-2">Manifiesta con Lau</h1>
         <p className="font-accent italic text-lg text-white/70 mb-8">
           Tu ritual diario para sostener la constancia que realmente cambia las cosas.
         </p>
