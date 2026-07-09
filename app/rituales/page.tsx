@@ -1,4 +1,4 @@
-import { createsupabaseServer } from '@/lib/supabaseClient';
+import { createServerSupabaseClient } from '@/lib/supabaseServer';
 import { getDailyRitual } from '@/lib/moonPhase';
 import WeeklyRitualTracker from '@/components/WeeklyRitualTracker';
 import SpecialRitualCard from '@/components/SpecialRitualCard';
