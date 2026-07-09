@@ -1,4 +1,4 @@
-import { createServerSupabaseClient } from '@/lib/supabaseServer';
+import { createServerSupabaseClient } from '@/lib/supabaseServer'';
 import Masthead from '@/components/Masthead';
 import BottomNav from '@/components/BottomNav';
 import AffirmationsBrowser from '@/components/AffirmationsBrowser';
