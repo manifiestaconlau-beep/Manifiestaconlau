@@ -118,3 +118,4 @@ supabase/
   seed_meditaciones_y_ritual.sql      → Meditaciones + ritual mensual
 middleware.ts          → Protege rutas: sin sesión → login, sin suscripción activa → gate
 ```
+actualizado
