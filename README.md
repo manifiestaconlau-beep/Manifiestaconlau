@@ -119,3 +119,4 @@ supabase/
 middleware.ts          → Protege rutas: sin sesión → login, sin suscripción activa → gate
 ```
 actualizado
+.
