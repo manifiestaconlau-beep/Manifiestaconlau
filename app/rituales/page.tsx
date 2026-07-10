@@ -4,7 +4,6 @@ import WeeklyRitualTracker from '@/components/WeeklyRitualTracker';
 import SpecialRitualCard from '@/components/SpecialRitualCard';
 import Masthead from '@/components/Masthead';
 import BottomNav from '@/components/BottomNav';
-import Link from 'next/link';
 
 export default async function RitualesPage() {
   const supabase = createServerSupabaseClient();
@@ -41,15 +40,6 @@ export default async function RitualesPage() {
           </span>
         </div>
       </div>
-
-      <Link
-        href="/afirmaciones"
-        className="card p-5 text-center block hover:border-pink transition-colors"
-      >
-        <span className="text-2xl">✨</span>
-        <h2 className="font-heading text-lg text-gold mt-1">Ver todas las afirmaciones</h2>
-        <p className="text-white/60 text-sm">Explorá por categoría y guardá tus favoritas.</p>
-      </Link>
 
       <BottomNav />
     </main>
