@@ -2,6 +2,7 @@ interface WeeklyStage {
   week: number;
   title: string;
   focus: string;
+  dateRange: string;
 }
 
 export default function WeeklyRitualTracker({
@@ -46,6 +47,7 @@ export default function WeeklyRitualTracker({
         })}
       </div>
       <p className="text-xs text-white/40 mb-4">Semana {currentStage.week} de 4</p>
+      <p className="text-xs text-gold/80 mb-1">{currentStage.dateRange}</p>
 
       {/* Solo se revela el contenido del ritual de esta semana */}
       <div className="border-t border-white/10 pt-4">
