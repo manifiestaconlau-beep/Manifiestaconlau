@@ -14,15 +14,16 @@ export default async function AudiosPage() {
     .from('meditations')
     .select('*')
     .eq('active', true)
+    .neq('category', 'despertador') // el despertador vive solo en la pantalla de Hoy
     .order('category');
 
   return (
     <main className="min-h-screen px-6 py-10 pb-24 max-w-2xl mx-auto space-y-6">
       <Masthead />
-      <h1 className="font-heading text-2xl text-pink text-center -mt-2">Audios</h1>
+      <h1 className="font-heading text-2xl text-pink text-center -mt-2">Meditaciones</h1>
 
       {/* Canal de YouTube: música para manifestar */}
-      <a
+      
         href="https://www.youtube.com/@ManifiestaconLau"
         target="_blank"
         rel="noopener noreferrer"
