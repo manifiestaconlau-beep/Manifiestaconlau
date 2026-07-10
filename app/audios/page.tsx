@@ -22,7 +22,7 @@ export default async function AudiosPage() {
       <Masthead />
       <h1 className="font-heading text-2xl text-pink text-center -mt-2">Meditaciones</h1>
 
-      <{/* Canal de YouTube: música para manifestar */}
+      <a{/* Canal de YouTube: música para manifestar */}
       
         href="https://www.youtube.com/@ManifiestaconLau"
         target="_blank"
