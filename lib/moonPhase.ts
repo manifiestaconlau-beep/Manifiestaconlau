@@ -116,6 +116,24 @@ export function getWeekOfMonth(date: Date = new Date()): number {
   return Math.min(4, Math.ceil(day / 7));
 }
 
+const MONTH_NAMES_ES = [
+  'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+  'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre',
+];
+
+/**
+ * Devuelve el rango de días (inicio y fin) que cubre una semana del mes dada,
+ * para mostrar al lado del ritual algo como "Del 8 al 14 de julio".
+ */
+export function getWeekOfMonthDateRange(date: Date = new Date()): string {
+  const week = getWeekOfMonth(date);
+  const lastDayOfMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+  const startDay = (week - 1) * 7 + 1;
+  const endDay = week === 4 ? lastDayOfMonth : week * 7;
+  const monthName = MONTH_NAMES_ES[date.getMonth()];
+  return `Del ${startDay} al ${endDay} de ${monthName}`;
+}
+
 const WEEKLY_STAGES = [
   {
     stage: 1,
@@ -145,7 +163,7 @@ const WEEKLY_STAGES = [
  */
 export function getWeeklyRitualStage(date: Date = new Date()) {
   const week = getWeekOfMonth(date);
-  return { week, ...WEEKLY_STAGES[week - 1] };
+  return { week, dateRange: getWeekOfMonthDateRange(date), ...WEEKLY_STAGES[week - 1] };
 }
 
 /**
