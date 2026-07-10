@@ -9,6 +9,8 @@ interface Affirmation {
   category: string;
 }
 
+const PREVIEW_COUNT = 2;
+
 export default function AffirmationsBrowser({
   userId,
   affirmations,
@@ -19,19 +21,18 @@ export default function AffirmationsBrowser({
   favoriteIds: string[];
 }) {
   const [favorites, setFavorites] = useState(new Set(favoriteIds));
-  const [filter, setFilter] = useState<'todas' | 'favoritas' | string>('todas');
+  const [showOnlyFavorites, setShowOnlyFavorites] = useState(false);
+  const [expandedCategories, setExpandedCategories] = useState(new Set<string>());
   const supabase = createClient();
 
-  const categories = useMemo(
-    () => Array.from(new Set(affirmations.map((a) => a.category))),
-    [affirmations]
-  );
-
-  const visible = affirmations.filter((a) => {
-    if (filter === 'todas') return true;
-    if (filter === 'favoritas') return favorites.has(a.id);
-    return a.category === filter;
-  });
+  const byCategory = useMemo(() => {
+    const groups = new Map<string, Affirmation[]>();
+    for (const a of affirmations) {
+      if (!groups.has(a.category)) groups.set(a.category, []);
+      groups.get(a.category)!.push(a);
+    }
+    return groups;
+  }, [affirmations]);
 
   async function toggleFavorite(id: string) {
     if (favorites.has(id)) {
@@ -47,59 +48,116 @@ export default function AffirmationsBrowser({
     }
   }
 
+  function toggleExpanded(category: string) {
+    setExpandedCategories((prev) => {
+      const next = new Set(prev);
+      if (next.has(category)) next.delete(category);
+      else next.add(category);
+      return next;
+    });
+  }
+
+  if (showOnlyFavorites) {
+    const favList = affirmations.filter((a) => favorites.has(a.id));
+    return (
+      <div className="space-y-5">
+        <FilterToggle showOnlyFavorites={showOnlyFavorites} onToggle={setShowOnlyFavorites} />
+        <div className="space-y-3">
+          {favList.map((a) => (
+            <AffirmationCardRow
+              key={a.id}
+              affirmation={a}
+              isFavorite={favorites.has(a.id)}
+              onToggleFavorite={() => toggleFavorite(a.id)}
+            />
+          ))}
+          {favList.length === 0 && (
+            <p className="text-white/50 text-center py-8">Todavía no guardaste ninguna favorita 🤍</p>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-5">
-      <div className="flex flex-wrap gap-2">
-        <FilterChip active={filter === 'todas'} onClick={() => setFilter('todas')}>
-          Todas
-        </FilterChip>
-        <FilterChip active={filter === 'favoritas'} onClick={() => setFilter('favoritas')}>
-          💗 Favoritas
-        </FilterChip>
-        {categories.map((c) => (
-          <FilterChip key={c} active={filter === c} onClick={() => setFilter(c)}>
-            {c}
-          </FilterChip>
-        ))}
-      </div>
+      <FilterToggle showOnlyFavorites={showOnlyFavorites} onToggle={setShowOnlyFavorites} />
 
-      <div className="space-y-3">
-        {visible.map((a) => (
-          <div key={a.id} className="card p-4 flex items-start justify-between gap-3">
-            <div>
-              <span className="text-xs uppercase tracking-wide text-salmon">{a.category}</span>
-              <p className="font-accent italic text-lg mt-1">&ldquo;{a.text}&rdquo;</p>
-            </div>
-            <button onClick={() => toggleFavorite(a.id)} className="text-2xl shrink-0">
-              {favorites.has(a.id) ? '💗' : '🤍'}
-            </button>
+      {Array.from(byCategory.entries()).map(([category, items]) => {
+        const isExpanded = expandedCategories.has(category);
+        const visible = isExpanded ? items : items.slice(0, PREVIEW_COUNT);
+        const remaining = items.length - PREVIEW_COUNT;
+
+        return (
+          <div key={category} className="space-y-3">
+            <h2 className="font-heading text-lg text-gold">{category}</h2>
+            {visible.map((a) => (
+              <AffirmationCardRow
+                key={a.id}
+                affirmation={a}
+                isFavorite={favorites.has(a.id)}
+                onToggleFavorite={() => toggleFavorite(a.id)}
+              />
+            ))}
+            {remaining > 0 && (
+              <button
+                onClick={() => toggleExpanded(category)}
+                className="text-sm text-pink hover:text-pink/80 transition-colors pl-1"
+              >
+                {isExpanded ? 'Ver menos' : `Ver ${remaining} más`}
+              </button>
+            )}
           </div>
-        ))}
-        {visible.length === 0 && (
-          <p className="text-white/50 text-center py-8">No hay afirmaciones para mostrar acá todavía.</p>
-        )}
-      </div>
+        );
+      })}
     </div>
   );
 }
 
-function FilterChip({
-  active,
-  onClick,
-  children,
+function FilterToggle({
+  showOnlyFavorites,
+  onToggle,
 }: {
-  active: boolean;
-  onClick: () => void;
-  children: React.ReactNode;
+  showOnlyFavorites: boolean;
+  onToggle: (v: boolean) => void;
 }) {
   return (
-    <button
-      onClick={onClick}
-      className={`rounded-full px-4 py-1.5 text-sm border transition-colors ${
-        active ? 'bg-pink border-pink text-white' : 'border-white/20 text-white/60 hover:border-pink'
-      }`}
-    >
-      {children}
-    </button>
+    <div className="flex gap-2">
+      <button
+        onClick={() => onToggle(false)}
+        className={`rounded-full px-4 py-1.5 text-sm border transition-colors ${
+          !showOnlyFavorites ? 'bg-pink border-pink text-white' : 'border-white/20 text-white/60 hover:border-pink'
+        }`}
+      >
+        Todas
+      </button>
+      <button
+        onClick={() => onToggle(true)}
+        className={`rounded-full px-4 py-1.5 text-sm border transition-colors ${
+          showOnlyFavorites ? 'bg-pink border-pink text-white' : 'border-white/20 text-white/60 hover:border-pink'
+        }`}
+      >
+        💗 Favoritas
+      </button>
+    </div>
+  );
+}
+
+function AffirmationCardRow({
+  affirmation,
+  isFavorite,
+  onToggleFavorite,
+}: {
+  affirmation: Affirmation;
+  isFavorite: boolean;
+  onToggleFavorite: () => void;
+}) {
+  return (
+    <div className="card p-4 flex items-start justify-between gap-3">
+      <p className="font-accent italic text-lg">&ldquo;{affirmation.text}&rdquo;</p>
+      <button onClick={onToggleFavorite} className="text-2xl shrink-0">
+        {isFavorite ? '💗' : '🤍'}
+      </button>
+    </div>
   );
 }
