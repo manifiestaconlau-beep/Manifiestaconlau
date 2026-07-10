@@ -24,7 +24,7 @@ export default async function AudiosPage() {
 
       {/* Canal de YouTube: música para manifestar */}
       
-        href="https://www.youtube.com/@ManifiestaconLau"
+        <href="https://www.youtube.com/@ManifiestaconLau"
         target="_blank"
         rel="noopener noreferrer"
         className="card p-6 text-center block hover:border-gold transition-colors"
