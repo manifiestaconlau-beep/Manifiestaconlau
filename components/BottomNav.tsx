@@ -7,8 +7,9 @@ const TABS = [
   { href: '/dashboard', label: 'Hoy', icon: '✦' },
   { href: '/diario', label: 'Diario', icon: '✎' },
   { href: '/rituales', label: 'Rituales', icon: '◐' },
-  { href: '/comunidad', label: 'Comunidad', icon: '◑' },
-  { href: '/audios', label: 'Audios', icon: '♪' },
+  { href: '/afirmaciones', label: 'Afirma.', icon: '✨' },
+  { href: '/comunidad', label: 'Comun.', icon: '◑' },
+  { href: '/audios', label: 'Medit.', icon: '♪' },
 ];
 
 export default function BottomNav() {
@@ -16,7 +17,7 @@ export default function BottomNav() {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-40 bg-[#12121c]/95 backdrop-blur border-t border-white/10">
-      <div className="max-w-2xl mx-auto grid grid-cols-5">
+      <div className="max-w-2xl mx-auto grid grid-cols-6">
         {TABS.map((tab) => {
           const active = pathname === tab.href;
           return (
