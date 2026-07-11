@@ -139,21 +139,45 @@ const WEEKLY_STAGES = [
     stage: 1,
     title: 'Semana de Intención',
     focus: 'Sembrás la intención central de este mes. Definí qué querés manifestar.',
+    exercise: [
+      'Elegí un lugar tranquilo y silenciá el celular unos minutos.',
+      'Escribí en tu diario una sola frase: "Este mes quiero manifestar..."',
+      'Debajo, anotá 3 señales concretas que te dirían que ya lo lograste.',
+      'Leé la frase en voz alta y guardala donde la veas seguido esta semana.',
+    ],
   },
   {
     stage: 2,
     title: 'Semana de Acción',
     focus: 'Ponés en movimiento lo que sembraste. Es momento de actuar, no solo de pensar.',
+    exercise: [
+      'Releé la intención que escribiste la semana pasada.',
+      'Elegí UNA acción concreta que puedas hacer hoy mismo para acercarte a eso.',
+      'Hacela antes de que termine el día, por pequeña que sea.',
+      'Anotá en tu diario cómo te sentiste al animarte a moverte.',
+    ],
   },
   {
     stage: 3,
     title: 'Semana de Integración',
     focus: 'Ajustás el rumbo y sostenés lo que ya construiste. Revisá qué está funcionando.',
+    exercise: [
+      'Repasá tus últimas entradas del diario de este mes.',
+      'Marcá qué te costó sostener y qué te salió con más facilidad.',
+      'Ajustá una sola cosa de tu rutina para la semana que viene.',
+      'Agradecé el esfuerzo sostenido hasta acá, aunque no esté "terminado".',
+    ],
   },
   {
     stage: 4,
     title: 'Semana de Cierre',
     focus: 'Cerrás el ciclo del mes, agradecés lo vivido y preparás el terreno para el próximo.',
+    exercise: [
+      'Escribí 3 cosas que lograste este mes, por pequeñas que parezcan.',
+      'Escribí una cosa que quieras dejar atrás antes de que empiece el mes nuevo.',
+      'Agradecé en voz alta el ciclo completo, tal como fue.',
+      'Cerrá los ojos un minuto y visualizá cómo querés arrancar el próximo mes.',
+    ],
   },
 ];
 
