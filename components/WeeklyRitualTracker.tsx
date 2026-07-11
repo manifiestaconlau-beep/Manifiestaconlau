@@ -3,6 +3,7 @@ interface WeeklyStage {
   title: string;
   focus: string;
   dateRange: string;
+  exercise: string[];
 }
 
 export default function WeeklyRitualTracker({
@@ -50,9 +51,23 @@ export default function WeeklyRitualTracker({
       <p className="text-xs text-gold/80 mb-1">{currentStage.dateRange}</p>
 
       {/* Solo se revela el contenido del ritual de esta semana */}
-      <div className="border-t border-white/10 pt-4">
-        <span className="text-xs uppercase tracking-widest text-salmon">{currentStage.title}</span>
-        <p className="text-white/70 text-sm mt-1">{currentStage.focus}</p>
+      <div className="border-t border-white/10 pt-4 text-left">
+        <p className="text-center">
+          <span className="text-xs uppercase tracking-widest text-salmon">{currentStage.title}</span>
+        </p>
+        <p className="text-white/70 text-sm mt-1 text-center">{currentStage.focus}</p>
+
+        <p className="text-xs uppercase tracking-widest text-gold/70 mt-4 mb-2">
+          Ejercicio para esta semana
+        </p>
+        <ol className="space-y-2">
+          {currentStage.exercise.map((step, i) => (
+            <li key={i} className="flex gap-2 text-white/80 text-sm">
+              <span className="text-pink font-semibold shrink-0">{i + 1}.</span>
+              <span>{step}</span>
+            </li>
+          ))}
+        </ol>
       </div>
     </div>
   );
