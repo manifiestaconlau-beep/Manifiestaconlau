@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import Link from 'next/link';
 import { createClient } from '@/lib/supabaseClient';
 
 interface Affirmation {
@@ -15,10 +16,12 @@ export default function AffirmationsBrowser({
   userId,
   affirmations,
   favoriteIds,
+  initialCategory,
 }: {
   userId: string;
   affirmations: Affirmation[];
   favoriteIds: string[];
+  initialCategory?: string;
 }) {
   const [favorites, setFavorites] = useState(new Set(favoriteIds));
   const [showOnlyFavorites, setShowOnlyFavorites] = useState(false);
@@ -55,6 +58,33 @@ export default function AffirmationsBrowser({
       else next.add(category);
       return next;
     });
+  }
+
+  // Si venimos de un link con categoría específica (ej: recomendación del
+  // medidor de vibración), mostramos SOLO esa categoría, ya expandida.
+  if (initialCategory && byCategory.has(initialCategory)) {
+    const items = byCategory.get(initialCategory)!;
+    return (
+      <div className="space-y-5">
+        <div className="flex items-center justify-between">
+          <span className="text-xs uppercase tracking-widest text-salmon">Mostrando</span>
+          <Link href="/afirmaciones" className="text-sm text-white/50 hover:text-white">
+            Ver todas →
+          </Link>
+        </div>
+        <h2 className="font-heading text-lg text-gold -mt-3">{initialCategory}</h2>
+        <div className="space-y-3">
+          {items.map((a) => (
+            <AffirmationCardRow
+              key={a.id}
+              affirmation={a}
+              isFavorite={favorites.has(a.id)}
+              onToggleFavorite={() => toggleFavorite(a.id)}
+            />
+          ))}
+        </div>
+      </div>
+    );
   }
 
   if (showOnlyFavorites) {
