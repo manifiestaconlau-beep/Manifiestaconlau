@@ -1,26 +1,76 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { createClient } from '@/lib/supabaseClient';
 
-function getMotivationalPhrase(avg: number): string {
+interface VibeResult {
+  avg: number;
+  tier: 'bajo' | 'medio_bajo' | 'equilibrio' | 'alto';
+  legend: string;
+  recommendation: { text: string; href: string; linkLabel: string } | null;
+}
+
+function getTier(avg: number): { tier: VibeResult['tier']; legend: string } {
   if (avg <= 3) {
-    return 'Hoy tu energía está más baja de lo normal, y está bien. Probá bajar el ritmo, escuchar una meditación corta, o simplemente respirar unos minutos antes de seguir.';
+    return {
+      tier: 'bajo',
+      legend: 'Tu energía está baja hoy, y está bien reconocerlo. Es momento de cuidarte antes que de exigirte.',
+    };
   }
-  if (avg <= 6) {
-    return 'Estás en un punto de equilibrio. Es un buen momento para sostener tu ritual sin exigirte de más.';
+  if (avg <= 5) {
+    return {
+      tier: 'medio_bajo',
+      legend: 'Estás por debajo de tu equilibrio. Un pequeño gesto hoy puede ayudarte a subir ese número.',
+    };
   }
   if (avg <= 8) {
-    return 'Tu energía está alta hoy. Aprovechá este impulso para avanzar en algo que vengas posponiendo.';
+    return {
+      tier: 'equilibrio',
+      legend: 'Estás en un buen punto de equilibrio. Sostené tu ritual sin exigirte de más.',
+    };
   }
-  return 'Estás en tu punto más alto. Es un día ideal para manifestar en grande y agradecer todo lo que ya tenés.';
+  return {
+    tier: 'alto',
+    legend: 'Estás en tu punto más alto. Día ideal para manifestar en grande y agradecer todo lo que ya tenés.',
+  };
+}
+
+// Según cuál de los 3 valores esté más bajo, sugiere una acción concreta y
+// distinta (meditación o categoría de afirmaciones) para elevar justo esa área.
+function getRecommendation(
+  body: number,
+  mind: number,
+  spirit: number
+): { text: string; href: string; linkLabel: string } {
+  const lowest = Math.min(body, mind, spirit);
+
+  if (lowest === body) {
+    return {
+      text: 'Tu cuerpo es lo que más pide atención hoy. Una meditación de descanso puede ayudarte a recargar.',
+      href: '/audios',
+      linkLabel: '🎧 Ir a Meditaciones',
+    };
+  }
+  if (lowest === mind) {
+    return {
+      text: 'Tu mente necesita un poco de calma hoy. Las afirmaciones de Paz Mental te pueden ayudar a bajar revoluciones.',
+      href: '/afirmaciones',
+      linkLabel: '✨ Ver afirmaciones de Paz Mental',
+    };
+  }
+  return {
+    text: 'Tu espíritu pide un poco de amor propio hoy. Unas afirmaciones de Amor o Gratitud pueden elevarte.',
+    href: '/afirmaciones',
+    linkLabel: '✨ Ver afirmaciones de Amor',
+  };
 }
 
 export default function VibeCheckCard({ userId, today }: { userId: string; today: string }) {
   const [body, setBody] = useState(5);
   const [mind, setMind] = useState(5);
   const [spirit, setSpirit] = useState(5);
-  const [result, setResult] = useState<number | null>(null);
+  const [result, setResult] = useState<VibeResult | null>(null);
   const [saving, setSaving] = useState(false);
   const supabase = createClient();
 
@@ -39,7 +89,10 @@ export default function VibeCheckCard({ userId, today }: { userId: string; today
       { onConflict: 'user_id,entry_date' }
     );
 
-    setResult(avg);
+    const { tier, legend } = getTier(avg);
+    const recommendation = tier === 'bajo' || tier === 'medio_bajo' ? getRecommendation(body, mind, spirit) : null;
+
+    setResult({ avg, tier, legend, recommendation });
     setSaving(false);
   }
 
@@ -61,9 +114,21 @@ export default function VibeCheckCard({ userId, today }: { userId: string; today
         </button>
       ) : (
         <div className="text-center pt-2 border-t border-white/10 mt-2">
-          <span className="font-accent italic text-5xl text-gold">{result}</span>
+          <span className="font-accent italic text-5xl text-gold">{result.avg}</span>
           <span className="text-white/50 text-sm block mb-2">tu número de hoy</span>
-          <p className="text-white/70 text-sm">{getMotivationalPhrase(result)}</p>
+          <p className="text-white/70 text-sm">{result.legend}</p>
+
+          {result.recommendation && (
+            <div className="mt-4 pt-4 border-t border-white/10">
+              <p className="text-white/70 text-sm mb-3">{result.recommendation.text}</p>
+              <Link
+                href={result.recommendation.href}
+                className="inline-block rounded-full bg-pink px-5 py-2 text-sm font-semibold hover:bg-pink/90 transition-colors"
+              >
+                {result.recommendation.linkLabel}
+              </Link>
+            </div>
+          )}
         </div>
       )}
     </div>
