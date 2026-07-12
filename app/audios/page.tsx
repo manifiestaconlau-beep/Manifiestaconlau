@@ -53,7 +53,7 @@ export default async function AudiosPage({
 
       {/* Canal de YouTube: música para manifestar (se oculta cuando viene filtrado, para no distraer) */}
       {!isFiltered && (
-        
+        <a
           href="https://www.youtube.com/@ManifiestaconLau"
           target="_blank"
           rel="noopener noreferrer"
