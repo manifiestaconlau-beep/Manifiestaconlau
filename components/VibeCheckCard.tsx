@@ -48,7 +48,7 @@ function getRecommendation(
   if (lowest === body) {
     return {
       text: 'Tu cuerpo es lo que más pide atención hoy. Una meditación de descanso puede ayudarte a recargar.',
-      href: '/audios',
+      href: '/audios?audio=para-descansar',
       linkLabel: '🎧 Ir a Meditaciones',
     };
   }
