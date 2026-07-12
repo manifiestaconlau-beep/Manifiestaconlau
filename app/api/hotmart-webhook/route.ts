@@ -55,10 +55,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Falta email del comprador' }, { status: 400 });
     }
 
+    console.log('Webhook Hotmart recibido:', { event, buyerEmail, transactionId });
+
     const supabase = createServiceClient();
 
     if (ACTIVE_EVENTS.includes(event)) {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('profiles')
         .update({
           subscription_status: 'active',
@@ -66,11 +68,23 @@ export async function POST(req: NextRequest) {
           subscription_plan: planName,
           subscription_expires_at: expiresAt.toISOString(),
         })
-        .eq('email', buyerEmail);
+        .eq('email', buyerEmail)
+        .select();
 
       if (error) {
         console.error('Error activando suscripción:', error);
         return NextResponse.json({ error: 'Error de base de datos' }, { status: 500 });
+      }
+
+      console.log('Filas actualizadas (activación):', data?.length ?? 0, data);
+
+      if (!data || data.length === 0) {
+        console.warn('No se encontró ningún perfil con ese email:', buyerEmail);
+        return NextResponse.json({
+          ok: true,
+          status: 'evento recibido pero no se encontró la usuaria',
+          email: buyerEmail,
+        });
       }
 
       return NextResponse.json({ ok: true, status: 'activada', email: buyerEmail });
