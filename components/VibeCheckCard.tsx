@@ -55,13 +55,13 @@ function getRecommendation(
   if (lowest === mind) {
     return {
       text: 'Tu mente necesita un poco de calma hoy. Las afirmaciones de Paz Mental te pueden ayudar a bajar revoluciones.',
-      href: '/afirmaciones',
+      href: '/afirmaciones?categoria=' + encodeURIComponent('Paz Mental'),
       linkLabel: '✨ Ver afirmaciones de Paz Mental',
     };
   }
   return {
     text: 'Tu espíritu pide un poco de amor propio hoy. Unas afirmaciones de Amor o Gratitud pueden elevarte.',
-    href: '/afirmaciones',
+   href: '/afirmaciones?categoria=' + encodeURIComponent('Amor'),
     linkLabel: '✨ Ver afirmaciones de Amor',
   };
 }
