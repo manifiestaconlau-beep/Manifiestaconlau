@@ -3,7 +3,11 @@ import Masthead from '@/components/Masthead';
 import BottomNav from '@/components/BottomNav';
 import AffirmationsBrowser from '@/components/AffirmationsBrowser';
 
-export default async function AfirmacionesPage() {
+export default async function AfirmacionesPage({
+  searchParams,
+}: {
+  searchParams: { categoria?: string };
+}) {
   const supabase = createServerSupabaseClient();
   const {
     data: { user },
@@ -26,6 +30,7 @@ export default async function AfirmacionesPage() {
         userId={user.id}
         affirmations={affirmations ?? []}
         favoriteIds={Array.from(favoriteIds)}
+        initialCategory={searchParams.categoria}
       />
 
       <BottomNav />
