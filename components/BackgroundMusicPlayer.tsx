@@ -7,6 +7,7 @@ export default function BackgroundMusicPlayer() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [playing, setPlaying] = useState(false);
   const [needsInteraction, setNeedsInteraction] = useState(false);
+  const [notFound, setNotFound] = useState(false);
   const supabase = createClient();
 
   const musicUrl = supabase.storage.from('meditaciones').getPublicUrl('musica-de-fondo.mp3').data
@@ -36,7 +37,7 @@ export default function BackgroundMusicPlayer() {
       audio.pause();
       setPlaying(false);
     } else {
-      audio.play();
+      audio.play().catch(() => setNotFound(true));
       setPlaying(true);
       setNeedsInteraction(false);
     }
@@ -44,15 +45,27 @@ export default function BackgroundMusicPlayer() {
 
   return (
     <>
-      <audio ref={audioRef} src={musicUrl} />
+      <audio ref={audioRef} src={musicUrl} onError={() => setNotFound(true)} />
       <button
         onClick={toggle}
-        title={playing ? 'Apagar música de fondo' : 'Prender música de fondo'}
-        className="fixed bottom-5 right-5 z-50 flex items-center gap-2 rounded-full bg-white/10 backdrop-blur border border-pink/30 px-4 py-2 text-sm text-white/90 hover:border-pink transition-colors"
+        title={
+          notFound
+            ? 'No se encontró el archivo de música'
+            : playing
+            ? 'Apagar música de fondo'
+            : 'Prender música de fondo'
+        }
+        className="fixed bottom-24 right-4 z-50 flex items-center gap-2 rounded-full bg-white/10 backdrop-blur border border-pink/30 px-4 py-2 text-sm text-white/90 hover:border-pink transition-colors shadow-lg"
       >
-        {playing ? '🎵' : '🔇'}
+        {notFound ? '⚠️' : playing ? '🎵' : '🔇'}
         <span className="hidden sm:inline">
-          {needsInteraction && !playing ? 'Prender música' : playing ? 'Música' : 'Música apagada'}
+          {notFound
+            ? 'Música no disponible'
+            : needsInteraction && !playing
+            ? 'Prender música'
+            : playing
+            ? 'Música'
+            : 'Música apagada'}
         </span>
       </button>
     </>
