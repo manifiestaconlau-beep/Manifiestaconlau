@@ -1,23 +1,28 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabaseClient';
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('');
+  const searchParams = useSearchParams();
+  const emailFromLink = searchParams.get('email') ?? '';
+
+  const [email, setEmail] = useState(emailFromLink);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [autoSent, setAutoSent] = useState(false);
 
   const supabase = createClient();
 
-  async function handleLogin(e: React.FormEvent) {
-    e.preventDefault();
+  async function handleLogin(e?: React.FormEvent, emailToUse?: string) {
+    e?.preventDefault();
     setLoading(true);
     setError('');
 
     const { error } = await supabase.auth.signInWithOtp({
-      email,
+      email: emailToUse ?? email,
       options: {
         emailRedirectTo: `${window.location.origin}/auth/callback`,
       },
@@ -31,10 +36,21 @@ export default function LoginPage() {
     }
   }
 
+  // Si venimos de la página de gracias de Hotmart con el email ya incluido
+  // en el link, mandamos el magic link automáticamente, sin que la clienta
+  // tenga que escribir nada ni tocar ningún botón.
+  useEffect(() => {
+    if (emailFromLink && !autoSent) {
+      setAutoSent(true);
+      handleLogin(undefined, emailFromLink);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [emailFromLink]);
+
   return (
     <main className="flex min-h-screen items-center justify-center px-6">
       <div className="card w-full max-w-md p-8 text-center">
-       <h1 className="font-heading text-4xl text-gold mb-2">Manifiesta con Lau</h1>
+        <h1 className="font-heading text-4xl text-gold mb-2">Manifiesta con Lau</h1>
         <p className="font-accent italic text-lg text-white/70 mb-8">
           Tu ritual diario para sostener la constancia que realmente cambia las cosas.
         </p>
@@ -43,9 +59,14 @@ export default function LoginPage() {
           <p className="text-white/90">
             Te enviamos un link mágico a <strong>{email}</strong>. Abrilo desde tu email para
             entrar, sin necesidad de contraseña.
+            <span className="block text-white/50 text-sm mt-3">
+              💡 Si no lo ves en unos minutos, revisá también la carpeta de spam o promociones.
+            </span>
           </p>
+        ) : emailFromLink && loading ? (
+          <p className="text-white/90">Estamos enviando tu acceso a {emailFromLink}...</p>
         ) : (
-          <form onSubmit={handleLogin} className="space-y-4">
+          <form onSubmit={(e) => handleLogin(e)} className="space-y-4">
             <input
               type="email"
               required
