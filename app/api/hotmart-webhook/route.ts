@@ -60,6 +60,28 @@ export async function POST(req: NextRequest) {
     const supabase = createServiceClient();
 
     if (ACTIVE_EVENTS.includes(event)) {
+      // Si la clienta compró ANTES de haber entrado alguna vez a la app, todavía
+      // no existe su perfil (se crea recién con el primer login). Nos aseguramos
+      // de que la cuenta exista ya mismo, para no depender del orden de eventos.
+      const { data: existingProfile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('email', buyerEmail)
+        .maybeSingle();
+
+      if (!existingProfile) {
+        console.log('No existía cuenta para este email, creándola ahora:', buyerEmail);
+        const { error: createError } = await supabase.auth.admin.createUser({
+          email: buyerEmail,
+          email_confirm: true, // se confirma sola: no hace falta que abra un mail de verificación aparte
+        });
+
+        if (createError && !createError.message?.toLowerCase().includes('already')) {
+          console.error('Error creando la cuenta nueva:', createError);
+          return NextResponse.json({ error: 'Error creando la cuenta' }, { status: 500 });
+        }
+      }
+
       const { data, error } = await supabase
         .from('profiles')
         .update({
