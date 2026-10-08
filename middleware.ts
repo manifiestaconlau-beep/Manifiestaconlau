@@ -1,5 +1,6 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
+import { getAccess } from '@/lib/access';
 
 // Rutas que no requieren login ni suscripción activa
 const PUBLIC_ROUTES = ['/login', '/registro', '/api/hotmart-webhook', '/suscripcion-vencida', '/auth/callback'];
@@ -43,15 +44,14 @@ export async function middleware(request: NextRequest) {
   // Con sesión: chequear estado de suscripción
   const { data: profile } = await supabase
     .from('profiles')
-    .select('subscription_status, subscription_expires_at')
+    .select('subscription_status, subscription_expires_at, trial_ends_at')
     .eq('id', user.id)
     .single();
 
-  const isActive =
-    profile?.subscription_status === 'active' &&
-    (!profile.subscription_expires_at || new Date(profile.subscription_expires_at) > new Date());
+  // Acceso = suscripción paga vigente O prueba gratis vigente (5 días)
+  const { hasAccess } = getAccess(profile);
 
-  if (!isActive) {
+  if (!hasAccess) {
     return NextResponse.redirect(new URL('/suscripcion-vencida', request.url));
   }
 

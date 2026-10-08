@@ -5,6 +5,8 @@ import VibeCheckCard from '@/components/VibeCheckCard';
 import Masthead from '@/components/Masthead';
 import BottomNav from '@/components/BottomNav';
 import Link from 'next/link';
+import { getAccess } from '@/lib/access';
+import { HOTMART_CHECKOUT_URL } from '@/lib/hotmart';
 
 // Elige una afirmación "del día" de forma determinística: todas las usuarias
 // ven la misma afirmación en el mismo día (crea sentido de comunidad/ritual compartido),
@@ -43,6 +45,13 @@ export default async function DashboardPage() {
         .gte('entry_date', sevenDaysAgoStr),
     ]);
 
+  const access = getAccess(profile);
+
+  // Link temporal (3 horas) al audio despertador: el bucket es privado
+  const { data: despertador } = await supabase.storage
+    .from('meditaciones')
+    .createSignedUrl('despertador/audio-despertador-1.wav', 60 * 60 * 3);
+
   const dailyAffirmation = affirmations && affirmations.length > 0 ? pickDailyAffirmation(affirmations) : null;
   const isFavorite = favorites?.some((f) => f.affirmation_id === dailyAffirmation?.id) ?? false;
   const alreadyCheckedInToday = profile?.last_checkin_date === today;
@@ -63,6 +72,21 @@ export default async function DashboardPage() {
       <p className="text-center text-white/50 text-sm -mt-4">
         {new Date().toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' })}
       </p>
+
+      {access.inTrial && (
+        <div className="card p-4 text-center -mt-2">
+          <p className="text-white/80 text-sm">
+            🎁 Estás en tu prueba gratis:{' '}
+            {access.trialDaysLeft === 1 ? 'te queda 1 día' : `te quedan ${access.trialDaysLeft} días`}.
+          </p>
+          <a
+            href={HOTMART_CHECKOUT_URL}
+            className="inline-block mt-2 rounded-full bg-pink px-5 py-1.5 text-sm font-semibold hover:bg-pink/90 transition-colors"
+          >
+            Suscribirme ahora
+          </a>
+        </div>
+      )}
 
       <StreakCard currentStreak={profile?.current_streak ?? 0} weekHistory={weekHistory} />
 
@@ -87,12 +111,7 @@ export default async function DashboardPage() {
           Escuchalo apenas te levantás, para arrancar el día con la energía correcta.
         </p>
         <audio controls className="w-full" preload="none">
-          <source
-            src={
-              supabase.storage.from('meditaciones').getPublicUrl('despertador/audio-despertador-1.wav')
-                .data.publicUrl
-            }
-          />
+          {despertador?.signedUrl && <source src={despertador.signedUrl} />}
         </audio>
       </div>
 

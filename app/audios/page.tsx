@@ -34,6 +34,13 @@ export default async function AudiosPage({
     ? meditations?.filter((m) => getSlug(m.audio_url) === requestedSlug)
     : null;
 
+  // Links temporales (3 horas) a cada audio: el bucket es privado
+  const paths = (meditations ?? []).map((m) => m.audio_url as string);
+  const { data: signed } = paths.length
+    ? await supabase.storage.from('meditaciones').createSignedUrls(paths, 60 * 60 * 3)
+    : { data: [] as { path: string | null; signedUrl: string }[] };
+  const urlByPath = new Map((signed ?? []).map((s) => [s.path, s.signedUrl]));
+
   const listToShow = filtered && filtered.length > 0 ? filtered : meditations;
   const isFiltered = Boolean(filtered && filtered.length > 0);
 
@@ -74,9 +81,7 @@ export default async function AudiosPage({
       {/* Meditaciones guiadas */}
       <div className="space-y-4">
         {listToShow?.map((m) => {
-          const {
-            data: { publicUrl },
-          } = supabase.storage.from('meditaciones').getPublicUrl(m.audio_url);
+          const signedUrl = urlByPath.get(m.audio_url);
 
           return (
             <div key={m.id} className="card p-5">
@@ -86,7 +91,7 @@ export default async function AudiosPage({
               </div>
               {m.description && <p className="text-white/60 text-sm mb-3">{m.description}</p>}
               <audio controls autoPlay={isFiltered} className="w-full" preload="none">
-                <source src={publicUrl} />
+                {signedUrl && <source src={signedUrl} />}
               </audio>
             </div>
           );

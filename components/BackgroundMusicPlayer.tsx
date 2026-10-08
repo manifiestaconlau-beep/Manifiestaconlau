@@ -10,7 +10,7 @@ export default function BackgroundMusicPlayer() {
   const [notFound, setNotFound] = useState(false);
   const supabase = createClient();
 
-  const musicUrl = supabase.storage.from('meditaciones').getPublicUrl('musica-de-fondo.mp3').data
+  const musicUrl = supabase.storage.from('publico').getPublicUrl('musica-de-fondo.mp3').data
     .publicUrl;
 
   useEffect(() => {
