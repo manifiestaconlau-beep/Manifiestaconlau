@@ -55,13 +55,17 @@ export default function LoginForm() {
       </p>
 
       {sent ? (
-        <p className="text-white/90">
-          Te enviamos un link mágico a <strong>{email}</strong>. Abrilo desde tu email para
-          entrar, sin necesidad de contraseña.
-          <span className="block text-white/50 text-sm mt-3">
-            💡 Si no lo ves en unos minutos, revisá también la carpeta de spam o promociones.
-          </span>
-        </p>
+        <div className="space-y-4">
+          <p className="text-white/90">
+            Te enviamos un link mágico a <strong>{email}</strong>. Abrilo desde tu email para
+            entrar, sin necesidad de contraseña.
+          </p>
+          <div className="rounded-lg border border-gold/40 bg-white/5 p-4 text-sm text-white/80">
+            📬 <strong>Si no lo ves, revisá la carpeta de Spam / No deseado</strong> o
+            Promociones. Si está ahí, marcalo como <em>“No es spam”</em> para que los próximos
+            lleguen a tu bandeja principal.
+          </div>
+        </div>
       ) : emailFromLink && loading ? (
         <p className="text-white/90">Estamos enviando tu acceso a {emailFromLink}...</p>
       ) : (

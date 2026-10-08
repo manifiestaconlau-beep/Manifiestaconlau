@@ -6,7 +6,7 @@ import Masthead from '@/components/Masthead';
 import BottomNav from '@/components/BottomNav';
 import Link from 'next/link';
 import { getAccess } from '@/lib/access';
-import { HOTMART_CHECKOUT_URL } from '@/lib/hotmart';
+import { hotmartCheckoutUrl } from '@/lib/hotmart';
 
 // Elige una afirmación "del día" de forma determinística: todas las usuarias
 // ven la misma afirmación en el mismo día (crea sentido de comunidad/ritual compartido),
@@ -80,7 +80,7 @@ export default async function DashboardPage() {
             {access.trialDaysLeft === 1 ? 'te queda 1 día' : `te quedan ${access.trialDaysLeft} días`}.
           </p>
           <a
-            href={HOTMART_CHECKOUT_URL}
+            href={hotmartCheckoutUrl(user.email)}
             className="inline-block mt-2 rounded-full bg-pink px-5 py-1.5 text-sm font-semibold hover:bg-pink/90 transition-colors"
           >
             Suscribirme ahora

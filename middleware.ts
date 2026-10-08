@@ -1,6 +1,7 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 import { getAccess } from '@/lib/access';
+import { hotmartCheckoutUrl } from '@/lib/hotmart';
 
 // Rutas que no requieren login ni suscripción activa
 const PUBLIC_ROUTES = ['/login', '/registro', '/api/hotmart-webhook', '/suscripcion-vencida', '/auth/callback'];
@@ -51,8 +52,10 @@ export async function middleware(request: NextRequest) {
   // Acceso = suscripción paga vigente O prueba gratis vigente (5 días)
   const { hasAccess } = getAccess(profile);
 
+  // Sin acceso (prueba terminada y sin pago): directo al pago de Hotmart,
+  // con su email ya cargado para que compre con el mismo email de su cuenta.
   if (!hasAccess) {
-    return NextResponse.redirect(new URL('/suscripcion-vencida', request.url));
+    return NextResponse.redirect(hotmartCheckoutUrl(user.email));
   }
 
   return response;
