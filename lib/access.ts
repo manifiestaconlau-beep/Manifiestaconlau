@@ -13,9 +13,15 @@ export type ProfileAccess =
 export function getAccess(profile: ProfileAccess) {
   const now = Date.now();
 
+  const expiresAt = profile?.subscription_expires_at
+    ? new Date(profile.subscription_expires_at).getTime()
+    : null;
+
+  // 'active': paga y vigente.
+  // 'cancelled': canceló, pero conserva el acceso hasta el fin del período que ya pagó.
   const isPaid =
-    profile?.subscription_status === 'active' &&
-    (!profile.subscription_expires_at || new Date(profile.subscription_expires_at).getTime() > now);
+    (profile?.subscription_status === 'active' && (expiresAt === null || expiresAt > now)) ||
+    (profile?.subscription_status === 'cancelled' && expiresAt !== null && expiresAt > now);
 
   const trialEnd = profile?.trial_ends_at ? new Date(profile.trial_ends_at).getTime() : 0;
   const inTrial = !isPaid && trialEnd > now;

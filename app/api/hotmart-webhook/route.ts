@@ -9,9 +9,10 @@ import { createServiceClient } from '@/lib/supabaseServer';
  *
  * Eventos que Hotmart envía y que este endpoint maneja:
  * - PURCHASE_APPROVED / PURCHASE_COMPLETE  -> activa la suscripción
- * - PURCHASE_CANCELED / PURCHASE_REFUNDED  -> cancela el acceso
- * - SUBSCRIPTION_CANCELLATION              -> cancela el acceso
- * - PURCHASE_EXPIRED / PURCHASE_CHARGEBACK  -> corta el acceso
+ * - SUBSCRIPTION_CANCELLATION / PURCHASE_CANCELED / PURCHASE_EXPIRED
+ *     -> la usuaria CONSERVA el acceso hasta el fin del período que ya pagó
+ * - PURCHASE_REFUNDED / PURCHASE_CHARGEBACK / PURCHASE_PROTEST
+ *     -> corta el acceso YA (le devolvieron la plata)
  * - SUBSCRIPTION_RENEWAL / PURCHASE_APPROVED (recurrente) -> extiende el acceso
  *
  * IMPORTANTE: Hotmart identifica al comprador por email. Por eso la cuenta
@@ -21,14 +22,15 @@ import { createServiceClient } from '@/lib/supabaseServer';
 const HOTMART_HOTTOK = process.env.HOTMART_HOTTOK; // token de seguridad de Hotmart
 
 const ACTIVE_EVENTS = ['PURCHASE_APPROVED', 'PURCHASE_COMPLETE', 'SUBSCRIPTION_RENEWAL'];
-const INACTIVE_EVENTS = [
-  'PURCHASE_CANCELED',
-  'PURCHASE_REFUNDED',
+// Cancelaciones: se marca como 'cancelled' pero el acceso sigue hasta
+// subscription_expires_at (el período que ya pagó).
+const CANCEL_KEEP_ACCESS_EVENTS = [
   'SUBSCRIPTION_CANCELLATION',
+  'PURCHASE_CANCELED',
   'PURCHASE_EXPIRED',
-  'PURCHASE_CHARGEBACK',
-  'PURCHASE_PROTEST',
 ];
+// Reembolsos y contracargos: se corta el acceso en el momento.
+const CUT_NOW_EVENTS = ['PURCHASE_REFUNDED', 'PURCHASE_CHARGEBACK', 'PURCHASE_PROTEST'];
 
 export async function POST(req: NextRequest) {
   try {
@@ -112,18 +114,36 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: true, status: 'activada', email: buyerEmail });
     }
 
-    if (INACTIVE_EVENTS.includes(event)) {
+    if (CANCEL_KEEP_ACCESS_EVENTS.includes(event)) {
+      // No tocamos subscription_expires_at: conserva lo que ya pagó.
       const { error } = await supabase
         .from('profiles')
         .update({ subscription_status: 'cancelled' })
         .eq('email', buyerEmail);
 
       if (error) {
-        console.error('Error cancelando suscripción:', error);
+        console.error('Error marcando cancelación:', error);
         return NextResponse.json({ error: 'Error de base de datos' }, { status: 500 });
       }
 
-      return NextResponse.json({ ok: true, status: 'cancelada', email: buyerEmail });
+      return NextResponse.json({ ok: true, status: 'cancelada (acceso hasta fin del período)', email: buyerEmail });
+    }
+
+    if (CUT_NOW_EVENTS.includes(event)) {
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          subscription_status: 'cancelled',
+          subscription_expires_at: new Date().toISOString(), // corte inmediato
+        })
+        .eq('email', buyerEmail);
+
+      if (error) {
+        console.error('Error cortando acceso:', error);
+        return NextResponse.json({ error: 'Error de base de datos' }, { status: 500 });
+      }
+
+      return NextResponse.json({ ok: true, status: 'acceso cortado', email: buyerEmail });
     }
 
     // Evento no manejado explícitamente: se responde OK igual para que Hotmart no reintente
